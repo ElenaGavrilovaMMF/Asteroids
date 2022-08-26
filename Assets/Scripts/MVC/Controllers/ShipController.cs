@@ -12,32 +12,45 @@ namespace Asteroids
         private readonly ShipView _shipView;
         private float _currentSpeedUp = 0;
 
-        public ShipController()
+        private float _vertical = 0f;
+        private float _horizontal = 0f;
+
+        private AsteroidsInputSystem _inputSystem;
+        private Vector2 _movementAxis;
+        
+        public ShipController(AsteroidsInputSystem inputSystem)
         {
             _shipView = LoadView();
-            CurrentShip = new Ship(_shipView.transform, _shipView.MovementSpeedUpMax, _shipView.RotationSpeed,
+            
+            _inputSystem = inputSystem;
+            _inputSystem.Player.Move.performed += ctx => _movementAxis = ctx.ReadValue<Vector2>();
+            
+            CurrentShip = new Ship(_shipView.transform, _shipView.MovementSpeed, _shipView.RotationSpeed,
                 _shipView.MovementSpeedUpMax, _shipView.SpeedUpStep, _shipView.SpeedDownStep);
         }
-
+        
         public override void Tick()
         {
-            Move();
+           Move();
         }
-
+        
+        // ReSharper disable Unity.PerformanceAnalysis
         private void Move()
         {
-            float vertical = Input.GetAxis("Vertical");
-            float horizontal = Input.GetAxis("Horizontal");
-
-            SetCurrentSpeedUp(vertical);
+            SetAxis();
+            SetCurrentSpeedUp(_vertical);
+            
             if (CurrentShip.ShipTransform)
             {
-                CurrentShip.ShipTransform.position += CurrentShip.ShipTransform.up * Time.deltaTime *
-                                                      (vertical * CurrentShip.MovementSpeed + _currentSpeedUp);
+                CurrentShip.ShipTransform.position += CurrentShip.ShipTransform.up *
+                                                          (Time.deltaTime * (_vertical * CurrentShip.MovementSpeed +
+                                                                             _currentSpeedUp));
                 CurrentShip.ShipTransform.Rotate(-Vector3.forward,
-                    horizontal * CurrentShip.RotationSpeed * Time.deltaTime);
+                        _horizontal * CurrentShip.RotationSpeed * Time.deltaTime);
                 CurrentShip.ShipTransform.position = CameraAction.PortalMovement(CurrentShip.ShipTransform);
             }
+                
+            
         }
 
         private void SetCurrentSpeedUp(float vertical)
@@ -62,6 +75,42 @@ namespace Asteroids
             CurrentShip.CurrentSpeed = _currentSpeedUp;
         }
 
+        private void SetAxis()
+        {
+            if (_inputSystem.Player.Move.IsPressed())
+            {
+                _vertical = _movementAxis.y != 0f
+                    ? _movementAxis.y / Mathf.Abs(_movementAxis.y)
+                    : 0f;
+                _horizontal = _movementAxis.x != 0f
+                    ? _movementAxis.x / Mathf.Abs(_movementAxis.x)
+                    : 0f;
+            }
+            else
+            {
+                CheckAxis(ref _vertical);
+                CheckAxis(ref _horizontal);
+            }
+        }
+
+        private void CheckAxis(ref float axis)
+        {
+            if (axis > 0f)
+            {
+                axis -= 0.01f;
+            }
+
+            if (axis < 0f)
+            {
+                axis += 0.01f;
+            }
+
+            if (axis < 0.1f && axis > -0.1f)
+            {
+                axis = 0f;
+            }
+        }
+        
         private ShipView LoadView()
         {
             var objView = Object.Instantiate(ResourceLoader.LoadPrefab(_viewPath));

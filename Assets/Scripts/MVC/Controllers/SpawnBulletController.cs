@@ -6,21 +6,26 @@ namespace Asteroids
 {
     public class SpawnBulletController : BaseController
     {
-        private readonly ResourcePath _viewPath = new ResourcePath {PathResource = Common.PathData.BULLET_SPAWN_PATH};
+        private readonly ResourcePath _viewPath = new() {PathResource = Common.PathData.BULLET_SPAWN_PATH};
         private SpawnBulletView _view;
         private Transform _transformParent;
-        private List<BulletController> _bulletsList = new List<BulletController>();
-        private List<GameObject> _spawnPoints = new List<GameObject>();
+        private List<BulletController> _bulletsList = new();
+        private List<GameObject> _spawnPoints = new();
         private int _bulletsCount;
         private int _currentCountIndex;
 
-        public SpawnBulletController(SpawnBulletView view)
+        private AsteroidsInputSystem _inputSystem;
+        private object _isShoot;
+        public SpawnBulletController(SpawnBulletView view, AsteroidsInputSystem inputSystem)
         {
             _transformParent = Load();
             _view = view;
             _spawnPoints = _view.SpawnPoints;
             _bulletsCount = _view.BulletsCount;
             _currentCountIndex = _spawnPoints.Count;
+            _inputSystem = inputSystem;
+            _inputSystem.Player.Fire.performed += ctx => _isShoot = ctx.ReadValueAsObject();
+
 
             Spawn();
         }
@@ -54,9 +59,11 @@ namespace Asteroids
             }
         }
 
+        // ReSharper disable Unity.PerformanceAnalysis
         private void Move()
         {
-            if (Input.GetKeyDown(KeyCode.Space))
+
+            if (_isShoot != null)
             {
                 int listBulletLength = 0;
                 foreach (BulletController bulletController in _bulletsList)
@@ -84,6 +91,8 @@ namespace Asteroids
                 {
                     AddNewBulletToPool();
                 }
+                
+                _isShoot = null;
             }
         }
 

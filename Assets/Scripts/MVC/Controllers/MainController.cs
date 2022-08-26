@@ -10,16 +10,17 @@ namespace Asteroids
         private MainMenuController _mainMenuController;
         private GameController _gameController;
         private UIController _uiController;
+        private AsteroidsInputSystem _inputSystem;
     
-        public MainController(Transform placeForUi, ProfilePlayer profilePlayer)
+        public MainController(Transform placeForUi, ProfilePlayer profilePlayer, AsteroidsInputSystem inputSystem)
         {
             _placeForUi = placeForUi;
             _profilePlayer = profilePlayer;
-    
+            _inputSystem = inputSystem;
             OnChangeGameState(profilePlayer.CurrentState.Value);
             profilePlayer.CurrentState.SubscribeOnChange(OnChangeGameState);
         }
-    
+
         public override void Tick()
         {
             _gameController?.Tick();
@@ -43,7 +44,7 @@ namespace Asteroids
                     break;
                 
                 case GameState.Game:
-                    _gameController = new GameController(_profilePlayer);
+                    _gameController = new GameController(_profilePlayer, _inputSystem);
                     _uiController = new UIController(_placeForUi, _gameController.GetShipData(), _gameController.GetLazerData());
                     _mainMenuController?.Dispose();
                     break;

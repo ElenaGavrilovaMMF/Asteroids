@@ -12,9 +12,12 @@ namespace Asteroids
         private bool _lazerIsActive = true;
         private bool _isNextBattery = false;
 
-        public SpawnLazerController(SpawnLazerView view)
+        private AsteroidsInputSystem _inputSystem;
+
+        public SpawnLazerController(SpawnLazerView view, AsteroidsInputSystem inputSystem)
         {
             _lazerView = view;
+            _inputSystem = inputSystem;
             CurrentLazer = new Lazer(_lazerView.LazerTime, _lazerView.Lazer, _lazerView.CountBattery,
                 _lazerView.BatteryLifeTime, _lazerView.BatteryReloadTime);
 
@@ -25,8 +28,10 @@ namespace Asteroids
 
         public override void Tick()
         {
-            if (Input.GetKey(KeyCode.LeftShift))
+            
+            if (_inputSystem.Player.Lazer.IsPressed() && !CurrentLazer.LazerTransform.gameObject.activeSelf)
             {
+               
                 if (_lazerIsActive)
                 {
                     _isNextBattery = true;
@@ -41,7 +46,7 @@ namespace Asteroids
             }
 
 
-            if (Input.GetKeyUp(KeyCode.LeftShift))
+            if (!_inputSystem.Player.Lazer.IsPressed() && CurrentLazer.LazerTransform.gameObject.activeSelf)
             {
                 CurrentLazer.LazerTransform.gameObject.SetActive(false);
                 _isNextBattery = false;
@@ -72,6 +77,7 @@ namespace Asteroids
             }
 
             _lazerIsActive = CurrentLazer.CurrentCountBattery > 0;
+            
         }
 
     }

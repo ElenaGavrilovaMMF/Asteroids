@@ -54,7 +54,12 @@ namespace Asteroids
         {
         
         }
-    
+        
+        public virtual void Init()
+        {
+        
+        }
+
         public virtual void Tick()
         {
         

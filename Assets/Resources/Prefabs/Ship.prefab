@@ -106,6 +106,7 @@ MonoBehaviour:
   MovementSpeedUpMax: 2.5
   SpeedUpStep: 0.1
   SpeedDownStep: 0.005
+  Movement: {x: 0, y: 0}
 --- !u!61 &4420608621617072540
 BoxCollider2D:
   m_ObjectHideFlags: 0

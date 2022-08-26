@@ -11,22 +11,22 @@ namespace Asteroids
         private SpawnLazerController _lazerController;
         private ProfilePlayer _profilePlayer;
         
-        public GameController(ProfilePlayer profilePlayer)
+        public GameController(ProfilePlayer profilePlayer, AsteroidsInputSystem _inputSystem)
         {
             _profilePlayer = profilePlayer;
             
-            _shipController = new ShipController();
+            _shipController = new ShipController(_inputSystem);
             _cakeSpawnController = new CakeSpawnController();
             _enemySpawnController = new EnemySpawnController(_shipController.GetViewObject().transform);
-            _spawnBulletController = new SpawnBulletController(_shipController.GetViewObject().GetComponentInChildren<SpawnBulletView>());
-            _lazerController = new SpawnLazerController(_shipController.GetViewObject().GetComponentInChildren<SpawnLazerView>());
+            _spawnBulletController = new SpawnBulletController(_shipController.GetViewObject().GetComponentInChildren<SpawnBulletView>(), _inputSystem);
+            _lazerController = new SpawnLazerController(_shipController.GetViewObject().GetComponentInChildren<SpawnLazerView>(), _inputSystem);
             AddController(_shipController);
             AddController(_cakeSpawnController);
             AddController(_enemySpawnController);
             AddController(_spawnBulletController);
             AddController(_lazerController);
         }
-    
+
         public override void Tick()
         {
             if (_profilePlayer.CurrentState.Value == GameState.Game)
